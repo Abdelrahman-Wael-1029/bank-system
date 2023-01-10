@@ -3,8 +3,49 @@
 int Client::number_client = 0;
 
 void BankApplication::run() {
+    ifstream file;
+    file.open("Bank_Clients.txt");
+    string name, id, pass, phone, address, kind_bank;
+    double balance;
+    string str;
+    while (getline(file, str)) {
+        stringstream s(str);
+        string temp;
+        s >> temp;
+        name += temp;
+        s >> temp;
+        name += temp;
+        s >> temp;
+        name += temp;
+        s >> temp;
+        pass = temp;
+        s >> temp;
+        id += temp;
+        s >> temp;
+        phone += temp;
+        s >> temp;
+        balance = stod(temp);
+        s >> temp;
+        kind_bank = temp;
+        while (s >> temp) {
+            address += temp + " ";
+        }
+        password.emplace(pass);
+        address.pop_back();
+        BankAccount *bank = nullptr;
+        auto *client = new Client(name, phone, id, address, pass);
+        if (kind_bank == "Saving") {
+            bank = new SavingsBankAccount(balance);
+        } else {
+            bank = new BankAccount(balance);
+        }
+        client->set_bank(bank);
+        bank->set_client(client);
+        clients.push_back(client);
+        ++Client::number_client;
+    }
+
     int choice;
-    string id;
     while (true) {
 
         cout << "1. Create a New Account\n"
@@ -27,18 +68,10 @@ void BankApplication::run() {
                 }
                 break;
             case 3:
-                if (Withdraw()) {
-                    cout << "The withdraw successfully\n";
-                } else {
-                    cout << "The Withdraw fail\n";
-                }
+                Withdraw();
                 break;
             case 4:
-                if (Deposit()) {
-                    cout << "The Deposit successfully\n";
-                } else {
-                    cout << "The Deposit fail\n";
-                }
+                Deposit();
                 break;
             case 5:
                 return;
@@ -48,21 +81,59 @@ void BankApplication::run() {
     }
 }
 
+bool BankApplication::valid_name(const string &name) {
+    regex ch("[a-zA-Z]* [a-zA-Z]* [a-zA-Z]*");
+    return regex_match(name, ch);
+}
+
+bool BankApplication::valid_phone(const string &phone) {
+    regex ch("(01)(0|1|2|5)[0-9]{8}");
+    return regex_match(phone, ch);
+}
+
+bool BankApplication::valid_password(const string &pass) {
+    regex ch("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9])[\\S]{8,}$");
+    int val = (int) regex_match(pass, ch);
+    if (!val) {
+        cout << "enter valid password\n";
+        return false;
+    }
+    if (password.find(pass) != password.end()) {
+        cout << "used password enter other password\n";
+        return false;
+    }
+    return true;
+}
+
 bool BankApplication::add_client() {
-    string name, id, password, phone, address;
+    string name, id, pass, phone, address;
     double balance;
 
-    cout << "Enter your name: ";
+    cout << "Triple enter your name: ";
     getline(cin >> ws, name);
+    while (!valid_name(name)) {
+        cout << "enter valid name\n";
+        getline(cin >> ws, name);
+    }
 
     cout << "Enter your phone: ";
     getline(cin >> ws, phone);
 
+    while (!valid_phone(phone)) {
+        cout << "enter valid phone\n";
+        getline(cin >> ws, phone);
+    }
+
     cout << "Enter your address: ";
     getline(cin >> ws, address);
 
-    cout << "Enter your password: ";
-    getline(cin >> ws, password);
+    cout << "Enter your password contain upper and lower letter and number and punctuation: ";
+    getline(cin >> ws, pass);
+
+    while (!valid_password(pass)) {
+
+        getline(cin >> ws, pass);
+    }
 
     cout << "Enter your money: ";
     cin >> balance;
@@ -87,21 +158,39 @@ bool BankApplication::add_client() {
         bank = new SavingsBankAccount(balance);
     }
 
-    Client *client = new Client(name, phone, id, address, password);
+    auto *client = new Client(name, phone, id, address, pass);
 
     client->set_bank(bank);
     bank->set_client(client);
+    password.emplace(pass);
 
+    fstream file;
+    file.open("Bank_Clients.txt", ios::app);
+    string add;
+    add += name;
+    add += " ";
+    add += pass;
+    add += " ";
+    add += id;
+    add += " ";
+    add += phone;
+    add += " ";
+    add += to_string(balance);
+    add += " ";
+    if (choice == 1) {
+        add += "Basic ";
+    } else add += "Saving ";
+    add += address;
+    add += '\n';
+    file << add;
     client->info();
     clients.push_back(client);
     client = nullptr;
     bank = nullptr;
     return true;
-
-
 }
 
-bool BankApplication::Withdraw() {
+void BankApplication::Withdraw() {
     int ind = -1;
     string id;
     cout << "enter your id: ";
@@ -110,19 +199,35 @@ bool BankApplication::Withdraw() {
         if (clients[i]->get_id() == id) {
             ind = i;
             break;
+        }
+    }
+    if (!~ind) {
+        cout << "incorrect id\n";
+        return;
+    }
+    string pass;
+    cout << "enter the password : ";
+    for (int i = 0; i < 4; ++i) {
+        cin >> pass;
+        if (pass != clients[ind]->get_password()) {
+            cout << "incorrect password\n";
+        } else break;
+        if (i == 3) {
+            return;
         }
     }
     int amount;
     cout << "Enter the amount your want withdraw it: ";
     cin >> amount;
-    if (clients[ind]->get_bank().Withdraw(amount)){
+    if (clients[ind]->get_bank().Withdraw(amount)) {
+        cout << "The withdraw successfully\n";
         clients[ind]->info();
-        return true;
+        return;
     }
-    return false;
+    cout << "The Withdraw fail\n";
 }
 
-bool BankApplication::Deposit() {
+void BankApplication::Deposit() {
     int ind = -1;
     string id;
     cout << "enter your id: ";
@@ -133,13 +238,28 @@ bool BankApplication::Deposit() {
             break;
         }
     }
+    if (!~ind) {
+        cout << "incorrect id\n";
+        return;
+    }
+    string pass;
+    cout << "enter the password : ";
+    for (int i = 0; i < 4; ++i) {
+        cin >> pass;
+        if (pass != clients[ind]->get_password()) {
+            cout << "incorrect password\n";
+        } else break;
+        if (i == 3) {
+            return;
+        }
+    }
     int amount;
     cout << "Enter the amount your want Deposit it: ";
     cin >> amount;
-    if (clients[ind]->get_bank().Deposit(amount)){
+    if (clients[ind]->get_bank().Deposit(amount)) {
+        cout << "The Deposit successfully\n";
         clients[ind]->info();
-        return true;
+        return;
     }
-
-    return false;
+    cout << "The Deposit fail\n";
 }

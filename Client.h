@@ -27,6 +27,8 @@ public:
 
     string get_id();
 
+    string get_password();
+
     ~Client();
 };
 

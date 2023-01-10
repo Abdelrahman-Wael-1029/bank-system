@@ -3,6 +3,9 @@
 
 #include <iostream>
 #include <vector>
+#include <regex>
+#include <set>
+#include <fstream>
 
 #define endl '\n'
 
@@ -12,13 +15,17 @@ using namespace std;
 
 class BankApplication
 {
+    bool valid_name(const string &);
+    bool valid_phone(const string &);
+    bool valid_password(const string &);
+    set<string> password;
 public:
     explicit BankApplication() = default;
     vector<Client *>clients;
 
     bool add_client();
-    bool Withdraw();
-    bool Deposit();
+    void Withdraw();
+    void Deposit();
     void run();
 };
 

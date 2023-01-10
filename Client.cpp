@@ -31,3 +31,7 @@ Client::Client() : bank(nullptr) {
 string Client::get_id() {
     return id;
 }
+
+string Client::get_password() {
+    return password;
+}
