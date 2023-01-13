@@ -9,9 +9,11 @@ using namespace std;
 class BankAccount;
 
 using namespace std;
-class Client {
+class Client
+{
     string name, phone, address, password, id;
     BankAccount *bank;
+
 public:
     static int number_client;
 
@@ -23,14 +25,19 @@ public:
 
     void set_bank(BankAccount *);
 
-    BankAccount& get_bank();
+    BankAccount *&get_bank();
 
+    string get_name();
+
+    string get_phone();
+
+    string get_address();
+    
     string get_id();
 
     string get_password();
 
     ~Client();
 };
-
 
 #endif

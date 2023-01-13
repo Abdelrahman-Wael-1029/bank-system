@@ -17,13 +17,26 @@ Client::Client(const string &name, const string &phone, const string &id, const 
                const string &password) : name(name), phone(phone), id(id), address(address),
                                                             password(password){}
 
-BankAccount &Client::get_bank() {
-    return *bank;
+BankAccount *&Client::get_bank() {
+    return bank;
 }
 
-Client::~Client() {
-    delete bank;
+string Client::get_name()
+{
+    return name;
 }
+
+string Client::get_phone()
+{
+    return phone;
+}
+
+string Client::get_address()
+{
+    return address;
+}
+
+Client::~Client() = default;
 
 Client::Client() : bank(nullptr) {
 }

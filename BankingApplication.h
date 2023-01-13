@@ -19,14 +19,16 @@ class BankApplication
     bool valid_phone(const string &);
     bool valid_password(const string &);
     set<string> password;
+    vector<Client *> clients;
+
 public:
     explicit BankApplication() = default;
-    vector<Client *>clients;
 
     bool add_client();
     void Withdraw();
     void Deposit();
     void run();
+    ~BankApplication();
 };
 
 #endif

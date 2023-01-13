@@ -2,7 +2,6 @@
 
 int main()
 {
-
      BankApplication mangment;
      mangment.run();
 

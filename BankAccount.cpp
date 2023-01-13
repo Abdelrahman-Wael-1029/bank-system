@@ -1,6 +1,3 @@
-//
-// Created by abdelrahman wael on 1/8/2023.
-//
 
 #include "BankAccount.h"
 
@@ -21,6 +18,7 @@ double BankAccount::get_balance() {
 bool BankAccount::Deposit(const double &amount) {
     balance += amount;
     return true;
+
 }
 
 bool BankAccount::Withdraw(const double &amount) {
@@ -31,9 +29,7 @@ bool BankAccount::Withdraw(const double &amount) {
     return true;
 }
 
-BankAccount::~BankAccount() {
-    delete client;
-}
+BankAccount::~BankAccount() = default;
 
 BankAccount::BankAccount() :client(nullptr), balance(0){
 }
